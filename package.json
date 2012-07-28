@@ -1,0 +1,14 @@
+{
+  "name": "zip_codes",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node index"
+  },
+  "dependencies": {
+    "htmlparser": "~1.7.6",
+    "request": "~2.9.2",
+    "async": "~0.1",
+    "lodash": "~0.1"
+  }
+}
