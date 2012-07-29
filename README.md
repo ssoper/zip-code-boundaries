@@ -7,6 +7,10 @@ Unable to find a suitable data source for zip codes and their boundaries, I hack
     npm install
     node index
 
+## Dependencies
+
+Other than what's listed in the `package.json`, it requires `unzip` to be in your `PATH`
+
 ## License
 
 MIT License
