@@ -27,11 +27,15 @@ var handler = new htmlparser.DefaultHandler(function (error, dom) {
     // console.log(states)
     
     fs.mkdir(tmpDir);
+    fs.mkdir('states');
     var d3Filename = 'us-zipcodes.json';
     fs.writeFileSync(d3Filename, '{ "type": "FeatureCollection", "features": [\n');
 
     var outerCount = 0;
     async.forEachSeries(states, function(state, async_cb) {
+      var d3StateFilename = 'states/' + state.name.replace(/\s/, '_') + '.json';
+      fs.writeFileSync(d3StateFilename, '{ "type": "FeatureCollection", "features": [\n');
+
       var filename = tmpDir + '/' + state.zipFile.split('/')[state.zipFile.split('/').length-1];
       console.log(filename)
       var writeStream = fs.createWriteStream(filename);
@@ -93,16 +97,27 @@ var handler = new htmlparser.DefaultHandler(function (error, dom) {
           })
 
           count = 0;
+          var allBuffer = '';
+          var stateBuffer = '';
           zipAreas.forEach(function(zipArea) {
             var coords = JSON.stringify(zipArea.coords).replace(/"/g, '');
             var line = '{ "type": "Feature", "properties": {}, "id": "' + zipArea.zipCode + '", "geometry": { "type": "Polygon", "coordinates": ['+ coords + '] }}';
+
             if (count < zipAreas.length - 1 || outerCount < states.length - 1) {
-              line = line + ',';
+              allBuffer = allBuffer + line + ',\n';
             }
-            line = line + '\n';
-            fs.appendFileSync(d3Filename, line);
+
+            if (count < zipAreas.length - 1) {
+              stateBuffer = stateBuffer + line + ',\n';
+            }
+
             count++;
           });
+
+          fs.appendFileSync(d3Filename, allBuffer);
+          fs.appendFileSync(d3StateFilename, stateBuffer);
+          fs.appendFileSync(d3StateFilename, ']}');
+          fs.closeSync(d3StateFilename);
 
           console.log(count + ' zip codes for ' + state.name);
           outerCount++;
@@ -114,6 +129,7 @@ var handler = new htmlparser.DefaultHandler(function (error, dom) {
       request.get(state.zipFile).pipe(writeStream);
     }, function(err) {
       fs.appendFileSync(d3Filename, ']}');
+      fs.closeSync(d3Filename);
     });
   }
 });
